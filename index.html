@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delivery Risk Dashboard</title>
+
+  <!-- Libraries via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js"></script>
+  <link  href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_simple.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <span class="header-title">delivery risk dashboard</span>
+      <span class="badge badge-danger" id="risk-badge">HIGH</span>
+    </div>
+    <div class="header-right">
+
+      <!-- MODE TOGGLE -->
+      <div class="mode-toggle">
+        <button class="btn-mode active" id="mode-file"   onclick="onModeChange('file',   this)">&#128196; file</button>
+        <button class="btn-mode"        id="mode-period" onclick="onModeChange('period', this)">&#128197; period</button>
+      </div>
+
+      <!-- FILE MODE: report dropdown (shown when mode = file) -->
+      <div id="file-controls" class="filter-group">
+        <select id="report-select" onchange="onReportChange(this.value)">
+          <!-- populated by dashboard.js -->
+        </select>
+      </div>
+
+      <!-- PERIOD MODE: preset buttons + date range calendar picker -->
+      <div id="period-controls" class="filter-group" style="display:none;">
+        <div class="period-presets">
+          <button class="btn-preset" onclick="applyPreset('week', this)">week</button>
+          <button class="btn-preset" onclick="applyPreset('month', this)">month</button>
+          <button class="btn-preset" onclick="applyPreset('year', this)">year</button>
+        </div>
+        <div class="date-range-wrap">
+          <span class="date-range-icon">&#128197;</span>
+          <input id="date-range-input" class="date-range-input" placeholder="select date range…" readonly />
+          <button class="btn-clear-range" id="btn-clear-range" onclick="clearDateRange()" style="display:none;" title="Clear">&#x2715;</button>
+        </div>
+      </div>
+
+      <button onclick="refreshData()" class="btn-icon" title="Refresh">&#8635;</button>
+    </div>
+  </header>
+
+  <!-- ── KPI CARDS ──────────────────────────────────────── -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">total deliveries</span>
+      <span class="kpi-value" id="kpi-total">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">failures</span>
+      <span class="kpi-value danger" id="kpi-fail">—</span>
+      <span class="kpi-sub" id="kpi-rate">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">successes</span>
+      <span class="kpi-value success" id="kpi-ok">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">whatsapp sent</span>
+      <span class="kpi-value" id="kpi-sent">—</span>
+      <span class="kpi-sub" id="kpi-sent-sub">—</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">fraud flags</span>
+      <span class="kpi-value danger" id="kpi-fraud">—</span>
+    </div>
+  </section>
+
+  <!-- ── CHARTS ROW ─────────────────────────────────────── -->
+  <section class="charts-grid">
+    <div class="card">
+      <p class="card-title">failure rate by region</p>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartRegion"
+          role="img"
+          aria-label="Horizontal bar chart showing failure rate per region"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">failure rate by carrier</p>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartCarrier"
+          role="img"
+          aria-label="Horizontal bar chart showing failure rate per carrier"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">failure trend</p>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartTrend"
+          role="img"
+          aria-label="Line chart showing failure rate trend across reports"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">top failure reasons</p>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartReasons"
+          role="img"
+          aria-label="Doughnut chart showing distribution of failure reasons"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FRAUD BANNER (hidden when no indicators) ───────── -->
+  <div class="fraud-banner" id="fraud-banner" style="display:none;">
+    <strong>&#9888; fraud indicators</strong>
+    <ul id="fraud-list"></ul>
+  </div>
+
+  <!-- ── CUSTOMER TABLE ────────────────────────────────── -->
+  <section class="card table-section">
+    <div class="table-header">
+      <p class="card-title">affected customers <span class="muted" id="cust-count"></span></p>
+      <div class="table-actions">
+        <input type="search" id="search-input" placeholder="search name or reason…" oninput="onSearch(this.value)" />
+        <select id="region-filter" onchange="onRegionFilter(this.value)">
+          <option value="">all regions</option>
+          <option>Zona Norte</option>
+          <option>Zona Sul</option>
+          <option>Zona Leste</option>
+          <option>Zona Oeste</option>
+          <option>Centro</option>
+          <option>Grande SP</option>
+        </select>
+        <button onclick="exportCSV()" class="btn-secondary">export CSV</button>
+      </div>
+    </div>
+    <div id="customer-table"></div>
+  </section>
+
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/table.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+/* ── RESET & BASE ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f5f4f0;
+  --surface:   #ffffff;
+  --border:    rgba(0,0,0,0.1);
+  --text:      #1a1a18;
+  --muted:     #73726c;
+  --danger:    #c0392b;
+  --danger-bg: #fdf0ef;
+  --success:   #1d6e3a;
+  --success-bg:#eaf5ee;
+  --warn:      #7a5200;
+  --warn-bg:   #fef6e4;
+  --info:      #1a4f8a;
+  --info-bg:   #e8f1fb;
+  --radius:    10px;
+  --radius-sm: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #1a1a18;
+    --surface:   #242422;
+    --border:    rgba(255,255,255,0.1);
+    --text:      #e8e6df;
+    --muted:     #888780;
+    --danger:    #f08070;
+    --danger-bg: #3a1a18;
+    --success:   #5dcaa5;
+    --success-bg:#0a2a1a;
+    --warn:      #f0c060;
+    --warn-bg:   #2a1e00;
+    --info:      #85b7eb;
+    --info-bg:   #0a1e3a;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 0 0 2rem;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-left  { display: flex; align-items: center; gap: 10px; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.header-title { font-size: 16px; font-weight: 500; }
+
+.btn-icon {
+  background: none;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text);
+}
+.btn-icon:hover { background: var(--bg); }
+
+select {
+  font-size: 13px;
+  padding: 5px 10px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* ── BADGES ──────────────────────────────────────────── */
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 99px;
+  display: inline-block;
+}
+.badge-danger  { background: var(--danger-bg);  color: var(--danger); }
+.badge-warn    { background: var(--warn-bg);    color: var(--warn); }
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-info    { background: var(--info-bg);    color: var(--info); }
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.kpi-grid, .charts-grid, .card, .fraud-banner, .table-section {
+  margin: 1rem 1.5rem 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+/* ── KPI CARDS ───────────────────────────────────────── */
+.kpi-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.2;
+}
+.kpi-value.danger  { color: var(--danger); }
+.kpi-value.success { color: var(--success); }
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── GENERIC CARD ────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.875rem;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* ── FRAUD BANNER ────────────────────────────────────── */
+.fraud-banner {
+  background: var(--danger-bg);
+  border: 0.5px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 0.875rem 1.25rem;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.fraud-banner ul {
+  margin-top: 6px;
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}
+
+/* ── CUSTOMER TABLE ──────────────────────────────────── */
+.table-section { padding-bottom: 1.25rem; }
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.table-header .card-title { margin: 0; }
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input[type="search"] {
+  font-size: 13px;
+  padding: 5px 10px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  width: 200px;
+}
+input[type="search"]:focus { outline: 2px solid var(--info); }
+
+.btn-secondary {
+  font-size: 12px;
+  padding: 5px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn-secondary:hover { background: var(--bg); }
+
+/* ── WHATSAPP BUTTON ─────────────────────────────────── */
+.btn-whatsapp {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.btn-whatsapp:hover  { background: var(--success-bg); color: var(--success); }
+.btn-whatsapp.sent   { background: var(--success-bg); color: var(--success); border-color: transparent; pointer-events: none; }
+
+/* ── TABULATOR OVERRIDES ─────────────────────────────── */
+.tabulator {
+  border: none !important;
+  background: var(--surface) !important;
+  font-size: 13px;
+}
+.tabulator .tabulator-header         { border-bottom: 0.5px solid var(--border) !important; background: var(--surface) !important; }
+.tabulator .tabulator-col            { background: var(--surface) !important; color: var(--muted) !important; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border: none !important; }
+.tabulator .tabulator-col:hover      { background: var(--bg) !important; }
+.tabulator .tabulator-col-content    { background: var(--surface) !important; }
+.tabulator .tabulator-tableholder    { background: var(--surface) !important; }
+.tabulator .tabulator-table          { background: var(--surface) !important; }
+.tabulator .tabulator-row            { background: var(--surface) !important; border-bottom: 0.5px solid var(--border) !important; color: var(--text) !important; }
+.tabulator .tabulator-row:hover      { background: var(--bg) !important; }
+.tabulator .tabulator-row-odd        { background: var(--surface) !important; }
+.tabulator .tabulator-row-even       { background: var(--surface) !important; }
+.tabulator .tabulator-cell           { color: var(--text) !important; border: none !important; background: transparent !important; }
+.tabulator .tabulator-footer         { background: var(--surface) !important; border-top: 0.5px solid var(--border) !important; color: var(--muted) !important; }
+.tabulator .tabulator-footer .tabulator-page        { background: var(--surface) !important; color: var(--text) !important; border: 0.5px solid var(--border) !important; border-radius: 4px; }
+.tabulator .tabulator-footer .tabulator-page:hover  { background: var(--bg) !important; }
+.tabulator .tabulator-footer .tabulator-page.active { background: var(--info-bg) !important; color: var(--info) !important; border-color: transparent !important; }
+.tabulator .tabulator-footer .tabulator-page-size   { background: var(--surface) !important; color: var(--text) !important; border: 0.5px solid var(--border) !important; border-radius: 4px; }
+.tabulator .tabulator-placeholder    { background: var(--surface) !important; color: var(--muted) !important; }
+
+
+/* ── MODE TOGGLE ─────────────────────────────────────── */
+.mode-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.btn-mode {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-mode:hover { background: var(--surface); color: var(--text); }
+.btn-mode.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0.5px 2px rgba(0,0,0,0.15);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── PERIOD PRESETS + DATE RANGE PICKER ─────────────── */
+.period-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-preset {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-preset:hover  { background: var(--bg); color: var(--text); }
+.btn-preset.active { background: var(--info-bg); color: var(--info); border-color: transparent; }
+
+.date-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 8px;
+  height: 32px;
+}
+
+.date-range-icon { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+
+.date-range-input {
+  font-size: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  width: 200px;
+  outline: none;
+}
+.date-range-input::placeholder { color: var(--muted); }
+
+.btn-clear-range {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+}
+.btn-clear-range:hover { color: var(--danger); }
+
+/* flatpickr theme overrides */
+.flatpickr-calendar {
+  background: var(--surface) !important;
+  border: 0.5px solid var(--border) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+  border-radius: var(--radius) !important;
+  font-family: inherit !important;
+}
+.flatpickr-day {
+  color: var(--text) !important;
+  border-radius: var(--radius-sm) !important;
+}
+.flatpickr-day:hover { background: var(--bg) !important; }
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange   { background: var(--info) !important; border-color: var(--info) !important; color: #fff !important; }
+.flatpickr-day.inRange    { background: var(--info-bg) !important; border-color: transparent !important; color: var(--info) !important; box-shadow: none !important; }
+.flatpickr-months         { background: var(--surface) !important; border-radius: var(--radius) var(--radius) 0 0 !important; }
+.flatpickr-month          { color: var(--text) !important; }
+.flatpickr-weekday        { color: var(--muted) !important; }
+.flatpickr-prev-month,
+.flatpickr-next-month     { color: var(--muted) !important; fill: var(--muted) !important; }
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover { color: var(--text) !important; fill: var(--text) !important; }
+.numInputWrapper input    { color: var(--text) !important; background: transparent !important; }
+.flatpickr-day.flatpickr-disabled { color: var(--muted) !important; opacity: 0.4; }
+
+/* ── PERIOD FILTER BUTTONS (legacy — kept for reference) ── */
+.period-filters {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.btn-period {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-period:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-period.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0.5px 2px rgba(0,0,0,0.15);
+}
+
+/* ── LOADING STATE ───────────────────────────────────── */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.muted { color: var(--muted); font-weight: 400; }
