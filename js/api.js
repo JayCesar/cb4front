@@ -3,7 +3,8 @@
 // Change API_BASE to your real API Gateway URL when deploying.
 // ─────────────────────────────────────────────────────────
 
-const API_BASE = 'http://localhost:8080'; // LOCAL — change to API Gateway URL in production
+// const API_BASE = 'http://localhost:8080'; // LOCAL — change to API Gateway URL in production
+const API_BASE = 'https://jsgb9ymcg1.execute-api.us-east-1.amazonaws.com/prod'; // real gateway
 
 // ── helpers ───────────────────────────────────────────────
 

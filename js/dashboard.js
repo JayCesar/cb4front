@@ -91,10 +91,22 @@ async function _fetchTrend(from, to)     { return useMock ? window._mockFetchTre
 async function _fetchCustomers(id)       { return useMock ? window._mockFetchCustomers(id)  : fetchCustomers(id); }
 async function _markSent(cid)            { return useMock ? window._mockMarkWhatsappSent(cid) : markWhatsappSent(cid); }
 
+// ── PINNED ROW (always first, regardless of period) ───────
+const JULIO = {
+  id: 'julio-pinned',
+  name: 'Julio',
+  whatsapp: '5511966566907',
+  failure_reason: 'Área com restrição (Risco de segurança)',
+  region: 'Zona Norte',
+  carrier: 'Loggi Express',
+  attempts: 2,
+  delivery_attempted_at: dayjs().subtract(1, 'day').hour(14).minute(30).toISOString(),
+  whatsapp_sent: false,
+};
+
 // ── STATE ─────────────────────────────────────────────────
 let currentReportId = null;
-let currentPeriod   = 'all';   // 'all' | 'week' | 'month' | 'year'
-let currentMode     = 'file';  // 'file' | 'period'
+let currentPeriod   = 'week';
 let activeDateFrom  = null;
 let activeDateTo    = null;
 let _calendar       = null;
@@ -124,8 +136,8 @@ function initCalendar() {
       if (selectedDates.length === 2) {
         activeDateFrom = dayjs(selectedDates[0]).startOf('day').toISOString();
         activeDateTo   = dayjs(selectedDates[1]).endOf('day').toISOString();
-        document.getElementById('btn-clear-range').style.display = 'inline-flex';
         clearPresetActive();
+        document.getElementById('btn-clear-range').style.display = 'inline-flex';
         reloadAll();
       }
     },
@@ -139,111 +151,43 @@ function applyPreset(period, btn) {
   activeDateTo   = to;
   currentPeriod  = period;
 
-  // reflect on the input without re-triggering onChange
   if (_calendar && from && to) {
     _calendar.setDate([new Date(from), new Date(to)], false);
   }
 
   clearPresetActive();
   if (btn) btn.classList.add('active');
-  document.getElementById('btn-clear-range').style.display = 'inline-flex';
+  document.getElementById('btn-clear-range').style.display = 'none';
   reloadAll();
 }
 
 function clearDateRange() {
-  activeDateFrom = null;
-  activeDateTo   = null;
-  currentPeriod  = 'all';
   if (_calendar) _calendar.clear();
-  clearPresetActive();
   document.getElementById('btn-clear-range').style.display = 'none';
-  reloadAll();
+  applyPreset('week', document.getElementById('preset-week'));
 }
 
 function clearPresetActive() {
   document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
 }
 
-// ── MODE SWITCH ──────────────────────────────────────────
-function onModeChange(mode, btn) {
-  currentMode = mode;
-
-  // update toggle buttons
-  document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  // show/hide the right controls
-  document.getElementById('file-controls').style.display   = mode === 'file'   ? 'flex' : 'none';
-  document.getElementById('period-controls').style.display = mode === 'period' ? 'flex' : 'none';
-
-  // init calendar on first switch to period mode
-  if (mode === 'period') initCalendar();
-
-  reloadAll();
-}
-
-async function onPeriodChange(period, btn) {
-  // update active button
-  document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentPeriod = period;
-  await reloadAll();
-}
-
 // ── INIT ──────────────────────────────────────────────────
-async function init() {
-  await reloadAll();
+function init() {
+  applyPreset('week', document.getElementById('preset-week'));
 }
 
 async function reloadAll() {
   try {
-    if (currentMode === 'file') {
-      // FILE MODE: load all reports for dropdown, show selected report's data
-      const reports = await _fetchReports();
-      if (!reports || reports.length === 0) {
-        console.warn('No reports found');
-        document.getElementById('report-select').innerHTML = '<option>no data</option>';
-        return;
-      }
-      populateReportDropdown(reports);
-      // keep current selection if it still exists, else pick latest
-      const ids = reports.map(r => String(r.id));
-      if (!ids.includes(String(currentReportId))) {
-        currentReportId = reports[0].id;
-      }
-      await loadReport(currentReportId);
-
-    } else {
-      // PERIOD MODE: filter reports by date range from calendar
-      const from = activeDateFrom;
-      const to   = activeDateTo;
-      const reports = await _fetchReports(from, to);
-      if (!reports || reports.length === 0) {
-        console.warn('No reports for this period');
-        document.getElementById('report-select').innerHTML = '<option>no data for period</option>';
-        return;
-      }
-      populateReportDropdown(reports);
-      currentReportId = reports[0].id;
-      await loadReport(currentReportId);
+    const reports = await _fetchReports(activeDateFrom, activeDateTo);
+    if (!reports || reports.length === 0) {
+      console.warn('No reports for this period');
+      return;
     }
+    currentReportId = reports[0].id;
+    await loadReport(currentReportId);
   } catch (err) {
     console.error('Failed to load dashboard:', err);
   }
-}
-
-function populateReportDropdown(reports) {
-  const sel = document.getElementById('report-select');
-  sel.innerHTML = reports.map(r => {
-    const dateStr = r.created_at || r.date || '';
-    const label   = dateStr ? dayjs(dateStr).format('DD MMM YYYY HH:mm') : `Report #${r.id}`;
-    return `<option value="${r.id}">${label} — ${r.risk_level}</option>`;
-  }).join('');
-}
-
-async function onReportChange(reportId) {
-  currentReportId = parseInt(reportId);
-  await loadReport(currentReportId);
 }
 
 async function refreshData() {
@@ -262,7 +206,7 @@ async function loadReport(reportId) {
       _fetchCustomers(reportId, { perPage: 200 }), // fetch enough to compute metrics
     ]);
 
-    const customers = customersRes.data || customersRes || [];
+    const customers = [JULIO, ...(customersRes.data || customersRes || [])];
 
     updateKPIs(summary, customers);
     updateRiskBadge(summary.risk_level);

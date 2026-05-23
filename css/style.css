@@ -300,6 +300,16 @@ input[type="search"]:focus { outline: 2px solid var(--info); }
   gap: 6px;
 }
 
+/* ── PERIOD LABEL ────────────────────────────────────── */
+.period-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
 /* ── PERIOD PRESETS + DATE RANGE PICKER ─────────────── */
 .period-presets {
   display: flex;
@@ -318,7 +328,13 @@ input[type="search"]:focus { outline: 2px solid var(--info); }
   transition: background 0.15s, color 0.15s;
 }
 .btn-preset:hover  { background: var(--bg); color: var(--text); }
-.btn-preset.active { background: var(--info-bg); color: var(--info); border-color: transparent; }
+.btn-preset.active {
+  background: var(--info);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(26,79,138,0.35);
+}
 
 .date-range-wrap {
   display: flex;

@@ -149,7 +149,7 @@ function renderTrendChart(data) {
   const dates = data.map(d => dayjs(d.created_at || d.date || ''));
   const dayStrs = dates.map(d => d.format('DD MMM'));
   const hasDuplicateDays = dayStrs.length !== new Set(dayStrs).size;
-  const labels = dates.map(d => hasDuplicateDays ? d.format('DD MMM HH:mm') : d.format('DD MMM'));
+  const labels = dates.map(d => hasDuplicateDays ? d.format('DD MMM YYYY HH:mm') : d.format('DD MMM YYYY'));
   const values = data.map(d => parseFloat((d.failure_rate_percent ?? d.failure_rate ?? 0).toFixed(1)));
 
   if (charts.trend) {
