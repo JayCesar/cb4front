@@ -88,7 +88,28 @@ async function _fetchRegions(id)         { return useMock ? window._mockFetchReg
 async function _fetchCarriers(id)        { return useMock ? window._mockFetchCarriers(id)   : fetchCarrierMetrics(id); }
 async function _fetchReasons(id)         { return useMock ? window._mockFetchReasons(id)    : fetchReasonMetrics(id); }
 async function _fetchTrend(from, to)     { return useMock ? window._mockFetchTrend()        : fetchTrend(from, to); }
-async function _fetchCustomers(id)       { return useMock ? window._mockFetchCustomers(id)  : fetchCustomers(id); }
+async function _fetchCustomers(id, opts)  { return useMock ? window._mockFetchCustomers(id)  : fetchCustomers(id, opts); }
+
+// Busca todas as páginas do backend (100 por vez) e devolve array completo
+async function fetchAllCustomers(reportId) {
+  if (useMock) return window._mockFetchCustomers(reportId);
+
+  const first = await fetchCustomers(reportId, { page: 1, perPage: 100 });
+  const data  = [...(first.data || [])];
+  const total = first.total || data.length;
+
+  if (total > data.length) {
+    const extraPages = Math.ceil((total - data.length) / 100);
+    const rest = await Promise.all(
+      Array.from({ length: extraPages }, (_, i) =>
+        fetchCustomers(reportId, { page: i + 2, perPage: 100 })
+      )
+    );
+    rest.forEach(p => data.push(...(p.data || [])));
+  }
+
+  return { data, total };
+}
 async function _markSent(cid)            { return useMock ? window._mockMarkWhatsappSent(cid) : markWhatsappSent(cid); }
 
 // ── PINNED ROW (always first, regardless of period) ───────
@@ -189,14 +210,38 @@ async function reloadAll() {
   try {
     const reports = await _fetchReports(activeDateFrom, activeDateTo);
     if (!reports || reports.length === 0) {
-      console.warn('No reports for this period');
+      showNoData();
       return;
     }
+    hideNoData();
     currentReportId = reports[0].id;
     await loadReport(currentReportId);
   } catch (err) {
     console.error('Failed to load dashboard:', err);
   }
+}
+
+function showNoData() {
+  document.getElementById('empty-banner').style.display  = 'flex';
+  document.getElementById('charts-section').style.display = 'none';
+  document.getElementById('table-section').style.display  = 'none';
+  document.getElementById('fraud-banner').style.display   = 'none';
+
+  ['kpi-total', 'kpi-fail', 'kpi-ok', 'kpi-sent', 'kpi-fraud'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+  document.getElementById('kpi-rate').textContent     = '—';
+  document.getElementById('kpi-sent-sub').textContent = '—';
+
+  const badge = document.getElementById('risk-badge');
+  badge.textContent = '—';
+  badge.className   = 'badge';
+}
+
+function hideNoData() {
+  document.getElementById('empty-banner').style.display   = 'none';
+  document.getElementById('charts-section').style.display = '';
+  document.getElementById('table-section').style.display  = '';
 }
 
 async function refreshData() {
@@ -212,7 +257,7 @@ async function loadReport(reportId) {
       _fetchCarriers(reportId),
       _fetchReasons(reportId),
       _fetchTrend(),
-      _fetchCustomers(reportId, { perPage: 200 }), // fetch enough to compute metrics
+      fetchAllCustomers(reportId),
     ]);
 
     const customers = [JULIO, ...(customersRes.data || customersRes || [])];
@@ -259,7 +304,13 @@ function updateKPIs(summary, customers) {
   else if (typeof fraudRaw === 'string') {
     try { const parsed = JSON.parse(fraudRaw); fraudCount = parsed.filter(f => f && f !== 'NONE').length; } catch {}
   }
-  document.getElementById('kpi-fraud').textContent = fraudCount || 'none';
+  const fraudCard = document.getElementById('kpi-fraud-card');
+  if (fraudCount > 0) {
+    document.getElementById('kpi-fraud').textContent = fraudCount;
+    fraudCard.style.display = '';
+  } else {
+    fraudCard.style.display = 'none';
+  }
 }
 
 function updateRiskBadge(level) {

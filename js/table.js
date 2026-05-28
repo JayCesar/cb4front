@@ -27,7 +27,7 @@ function initCustomerTable(data) {
     layout: 'fitColumns',
     pagination: true,
     paginationSize: 15,
-    paginationSizeSelector: [10, 15, 25, 50],
+    paginationSizeSelector: [10, 15, 25, 50, 100],
     movableColumns: false,
     placeholder: 'no customers found',
     columns: [

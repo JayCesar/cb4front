@@ -64,14 +64,21 @@
       <span class="kpi-value" id="kpi-sent">—</span>
       <span class="kpi-sub" id="kpi-sent-sub">—</span>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" id="kpi-fraud-card" style="display:none;">
       <span class="kpi-label">fraud flags</span>
       <span class="kpi-value danger" id="kpi-fraud">—</span>
     </div>
   </section>
 
+  <!-- ── EMPTY STATE (exibido quando nenhum relatório encontrado) ── -->
+  <div class="empty-banner" id="empty-banner" style="display:none;">
+    <span class="empty-icon">&#128202;</span>
+    <p class="empty-title">nenhum dado encontrado</p>
+    <p class="empty-sub">não há relatórios para o período selecionado. tente um intervalo diferente.</p>
+  </div>
+
   <!-- ── CHARTS ROW ─────────────────────────────────────── -->
-  <section class="charts-grid">
+  <section class="charts-grid" id="charts-section">
     <div class="card">
       <p class="card-title">failure rate by region</p>
       <div class="chart-wrap" style="height:220px;">
@@ -113,7 +120,7 @@
   </div>
 
   <!-- ── CUSTOMER TABLE ────────────────────────────────── -->
-  <section class="card table-section">
+  <section class="card table-section" id="table-section">
     <div class="table-header">
       <p class="card-title">affected customers <span class="muted" id="cust-count"></span></p>
       <div class="table-actions">
