@@ -11,27 +11,20 @@ const COLORS = {
   info:    '#378ADD',
 };
 
-// Map failure rate to a color
-function rateColor(rate) {
-  // absolute thresholds (when failure_rate is % of total deliveries)
-  if (rate >= 35) return COLORS.danger;
-  if (rate >= 25) return COLORS.warn;
-  return COLORS.ok;
-}
+// Paleta com tom único por barra — nenhuma cor se repete nas primeiras 8 entradas
+const BAR_PALETTE = [
+  '#378ADD', // azul
+  '#E24B4A', // vermelho
+  '#1D9E75', // verde
+  '#EF9F27', // âmbar
+  '#9B6BE8', // violeta
+  '#EC6AAA', // rosa
+  '#17B4A8', // teal
+  '#F07340', // laranja-coral
+];
 
-// Color bars relative to each other within the same chart
-// top 25% = red, middle 50% = yellow, bottom 25% = green
-function relativeColors(values) {
-  if (!values || values.length === 0) return [];
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-  return values.map(v => {
-    const pct = (v - min) / range; // 0 = lowest, 1 = highest
-    if (pct >= 0.75) return COLORS.danger;
-    if (pct >= 0.35) return COLORS.warn;
-    return COLORS.ok;
-  });
+function paletteColors(count) {
+  return Array.from({ length: count }, (_, i) => BAR_PALETTE[i % BAR_PALETTE.length]);
 }
 
 // Shared Chart.js defaults
@@ -57,7 +50,7 @@ function renderRegionChart(data) {
   const sorted = [...normalized].sort((a, b) => b.failure_rate - a.failure_rate);
   const labels = sorted.map(d => d.region);
   const values = sorted.map(d => parseFloat((+d.failure_rate).toFixed(1)));
-  const colors = relativeColors(values);
+  const colors = paletteColors(values.length);
 
   if (charts.region) {
     charts.region.data.labels = labels;
@@ -106,7 +99,7 @@ function renderCarrierChart(data) {
   const sorted = [...normalized].sort((a, b) => b.failure_rate - a.failure_rate);
   const labels = sorted.map(d => d.carrier);
   const values = sorted.map(d => parseFloat((+d.failure_rate).toFixed(1)));
-  const colors = relativeColors(values);
+  const colors = paletteColors(values.length);
 
   if (charts.carrier) {
     charts.carrier.data.labels = labels;
@@ -149,7 +142,7 @@ function renderTrendChart(data) {
   const dates = data.map(d => dayjs(d.created_at || d.date || ''));
   const dayStrs = dates.map(d => d.format('DD MMM'));
   const hasDuplicateDays = dayStrs.length !== new Set(dayStrs).size;
-  const labels = dates.map(d => hasDuplicateDays ? d.format('DD MMM HH:mm') : d.format('DD MMM'));
+  const labels = dates.map(d => hasDuplicateDays ? d.format('DD MMM YYYY HH:mm') : d.format('DD MMM YYYY'));
   const values = data.map(d => parseFloat((d.failure_rate_percent ?? d.failure_rate ?? 0).toFixed(1)));
 
   if (charts.trend) {

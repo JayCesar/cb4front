@@ -113,6 +113,12 @@ select {
   gap: 12px;
 }
 
+/* Permite que os cards encolham dentro do grid (fix padrão CSS Grid) */
+.charts-grid > .card {
+  min-width: 0;
+  overflow: hidden;
+}
+
 /* ── KPI CARDS ───────────────────────────────────────── */
 .kpi-card {
   background: var(--surface);
@@ -165,6 +171,12 @@ select {
 .chart-wrap {
   position: relative;
   width: 100%;
+  overflow: hidden;
+}
+
+.chart-wrap canvas {
+  display: block;
+  max-width: 100%;
 }
 
 /* ── FRAUD BANNER ────────────────────────────────────── */
@@ -300,6 +312,16 @@ input[type="search"]:focus { outline: 2px solid var(--info); }
   gap: 6px;
 }
 
+/* ── PERIOD LABEL ────────────────────────────────────── */
+.period-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
 /* ── PERIOD PRESETS + DATE RANGE PICKER ─────────────── */
 .period-presets {
   display: flex;
@@ -318,7 +340,13 @@ input[type="search"]:focus { outline: 2px solid var(--info); }
   transition: background 0.15s, color 0.15s;
 }
 .btn-preset:hover  { background: var(--bg); color: var(--text); }
-.btn-preset.active { background: var(--info-bg); color: var(--info); border-color: transparent; }
+.btn-preset.active {
+  background: var(--info);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(26,79,138,0.35);
+}
 
 .date-range-wrap {
   display: flex;
@@ -424,3 +452,98 @@ input[type="search"]:focus { outline: 2px solid var(--info); }
 }
 
 .muted { color: var(--muted); font-weight: 400; }
+
+/* ── EMPTY STATE ─────────────────────────────────────── */
+.empty-banner {
+  margin: 1rem 1.5rem 0;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.empty-icon  { font-size: 2rem; line-height: 1; }
+.empty-title { font-size: 15px; font-weight: 500; color: var(--text); }
+.empty-sub   { font-size: 13px; color: var(--muted); max-width: 340px; }
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Header */
+  .header {
+    padding: 0.75rem 1rem;
+    gap: 8px;
+  }
+  .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .period-label { display: none; }
+  .filter-group {
+    flex: 1;
+    flex-wrap: wrap;
+  }
+  .date-range-wrap {
+    flex: 1;
+    min-width: 140px;
+  }
+  .date-range-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Content margins */
+  .kpi-grid,
+  .charts-grid,
+  .card,
+  .fraud-banner,
+  .table-section,
+  .empty-banner {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  /* Charts in one column */
+  .charts-grid { grid-template-columns: 1fr; }
+
+  /* Table header stacks */
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .table-actions {
+    width: 100%;
+  }
+  input[type="search"] {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .header { padding: 0.75rem; }
+
+  .kpi-grid,
+  .charts-grid,
+  .card,
+  .fraud-banner,
+  .table-section,
+  .empty-banner {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+  }
+
+  .kpi-grid  { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 22px; }
+
+  .period-presets { flex-wrap: wrap; }
+
+  .btn-preset {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
