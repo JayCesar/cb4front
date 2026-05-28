@@ -112,12 +112,21 @@ let activeDateTo    = null;
 let _calendar       = null;
 
 // ── PERIOD HELPERS ────────────────────────────────────────
+// function periodRange(period) {
+//   const now = dayjs();
+//   if (period === 'week')  return { from: now.subtract(7,  'day').toISOString(),  to: now.toISOString() };
+//   if (period === 'month') return { from: now.subtract(30, 'day').toISOString(),  to: now.toISOString() };
+//   if (period === 'year')  return { from: now.subtract(365,'day').toISOString(),  to: now.toISOString() };
+//   return { from: null, to: null }; // 'all'
+// }
+
+// SEM HORAS
 function periodRange(period) {
   const now = dayjs();
-  if (period === 'week')  return { from: now.subtract(7,  'day').toISOString(),  to: now.toISOString() };
-  if (period === 'month') return { from: now.subtract(30, 'day').toISOString(),  to: now.toISOString() };
-  if (period === 'year')  return { from: now.subtract(365,'day').toISOString(),  to: now.toISOString() };
-  return { from: null, to: null }; // 'all'
+  if (period === 'week')  return { from: now.subtract(7,  'day').format('YYYY-MM-DD'), to: now.format('YYYY-MM-DD') };
+  if (period === 'month') return { from: now.subtract(30, 'day').format('YYYY-MM-DD'), to: now.format('YYYY-MM-DD') };
+  if (period === 'year')  return { from: now.subtract(365,'day').format('YYYY-MM-DD'), to: now.format('YYYY-MM-DD') };
+  return { from: null, to: null };
 }
 
 // ── CALENDAR / DATE RANGE ─────────────────────────────────
